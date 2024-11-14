@@ -4,12 +4,86 @@ include:
     file:
       - /shared/build-and-push-image.yml
       - /shared/deploy-kubefiles.yml
+      - /shared/upload-to-aliyun-oss.yml
+  - .gitlab/.gitlab-ci.mixin.yml
 
 stages:
   - image
   - deploy-staging
   - deploy-production
+  - build
+  - image-assets
+  - version
 
+variables:
+  ALIYUN_OSS_BUCKET: tds-abd-sh
+  ALIYUN_OSS_ENDPOINT: oss-cn-shanghai-internal.aliyuncs.com
+
+# 国内预览环境构建
+build_mr_cn:
+  extends: .default_build
+  variables:
+    PREVIEW_PREFIX: tapsdk-doc-cn
+  script:
+    - source ./scripts/make-preview.sh preview
+    - yarn run build-cn:preview
+  rules:
+    - changes:
+        - "**/*"
+    - changes:
+        - hk/**
+      when: never
+  artifacts:
+    paths:
+      - cn/build
+
+upload-assets-mr-cn:
+  extends: .default_upload
+  variables:
+    SRC_PATH: cn/build
+    DEST_PATH: preview/tapsdk-doc-cn-$CI_MERGE_REQUEST_ID
+  needs:
+    - build_mr_cn
+
+mr_slack_cn:
+  extends: .default_slack
+  variables:
+    PREVIEW_PREFIX: tapsdk-doc-cn
+    BUILD_LOCATION: cn
+
+# hk预览环境构建
+build_mr_hk:
+  extends: .default_build
+  variables:
+    PREVIEW_PREFIX: tapsdk-doc-intl
+  script:
+    - source ./scripts/make-preview.sh preview
+    - yarn run build-hk:preview
+  rules:
+    - changes:
+        - "**/*"
+    - changes:
+        - cn/**
+      when: never
+  artifacts:
+    paths:
+      - hk/build
+
+upload-assets-mr-hk:
+  extends: .default_upload
+  variables:
+    SRC_PATH: hk/build
+    DEST_PATH: preview/tapsdk-doc-intl-$CI_MERGE_REQUEST_ID
+  needs:
+    - build_mr_hk
+
+mr_slack_hk:
+  extends: .default_slack
+  variables:
+    PREVIEW_PREFIX: tapsdk-doc-intl
+    BUILD_LOCATION: intl
+
+# 线上环境构建
 build-and-push-image:
   stage: image
   extends:
