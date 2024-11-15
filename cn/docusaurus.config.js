@@ -132,6 +132,7 @@ const config = {
     plugins: [
         "docusaurus-plugin-sass",
         path.resolve(__dirname, "./plugins/npsmeter"),
+        require.resolve('./plugins/custom-public-path'),
     ],
 };
 

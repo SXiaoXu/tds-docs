@@ -2,139 +2,135 @@ include:
   - project: sre/gitlab-ci-templates
     ref: v1
     file:
-      - /shared/build-and-push-image.yml
       - /shared/deploy-kubefiles.yml
       - /shared/upload-to-aliyun-oss.yml
   - .gitlab/.gitlab-ci.mixin.yml
-
-variables:
-  ALIYUN_OSS_BUCKET: tds-abd-sh
-  ALIYUN_OSS_ENDPOINT: oss-cn-shanghai-internal.aliyuncs.com
 
 stages:
   - build
   - upload
   - deploy
 
-# 国内预览环境构建
-build_mr_cn:
-  stage: build
-  extends: 
-    - .mixin_build
-    - .mixin_cn_rule
-  variables:
-    PREVIEW_PREFIX: tapsdk-doc-cn
-  script:
-    - source ./scripts/make-preview.sh preview
-    - yarn run build-cn:preview
-  artifacts:
-    paths:
-      - cn/build
-
-upload-assets-mr-cn:
-  stage: upload
-  extends: .mixin_upload
-  variables:
-    SRC_PATH: cn/build
-    DEST_PATH: preview/tapsdk-doc-cn-$CI_MERGE_REQUEST_ID
-  needs:
-    - build_mr_cn
-
-mr_slack_cn:
-  stage: upload
-  extends: .mixin_slack
-  variables:
-    PREVIEW_PREFIX: tapsdk-doc-cn
-    BUILD_LOCATION: cn
-  needs:
-    - upload-assets-mr-cn
-
-# hk预览环境构建
-build_mr_hk:
-  stage: build
-  extends: 
-    - .mixin_build
-    - .mixin_hk_rule
-  variables:
-    PREVIEW_PREFIX: tapsdk-doc-intl
-  script:
-    - source ./scripts/make-preview.sh preview
-    - yarn run build-hk:preview
-  artifacts:
-    paths:
-      - hk/build
-
-upload-assets-mr-hk:
-  stage: upload
-  extends: .mixin_upload
-  variables:
-    SRC_PATH: hk/build
-    DEST_PATH: preview/tapsdk-doc-intl-$CI_MERGE_REQUEST_ID
-  needs:
-    - build_mr_hk
-
-mr_slack_hk:
-  stage: upload
-  extends: .mixin_slack
-  variables:
-    PREVIEW_PREFIX: tapsdk-doc-intl
-    BUILD_LOCATION: intl
-  needs:
-    - upload-assets-mr-hk
-
-# cn线上环境构建
+# 国内 构建
 build_cn:
   stage: build
   extends: 
     - .mixin_build
     - .mixin_cn_rule
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        CDN_PATH: https://assets.tapimg.com/apps/tap-sdk-doc/mr/cn/$CI_MERGE_REQUEST_ID
+        APP_PUBLIC_PATH: https://developer.xdrnd.com
+        APP_ROUTER_BASE_URL: /docs/tapsdk-cn-$CI_MERGE_REQUEST_ID/
+    - if: $CI_COMMIT_BRANCH == "master"
+      variables:
+        CDN_PATH: https://assets.tapimg.com/apps/tap-sdk-doc/prod
+        APP_PUBLIC_PATH: https://developer.taptap.cn
+        APP_ROUTER_BASE_URL: /docs/
   script:
-    - yarn run build-cn
+    - yarn run build-cn:preview
   artifacts:
     paths:
       - cn/build
-  only:
-    - master
 
-upload-assets-cn:
+upload_assets_cn:
   stage: upload
+  extends: 
+    - .mixin_upload
+    - .mixin_cn_rule
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        SRC_PATH: cn/build
+        DEST_PATH: apps/tap-sdk-doc/mr/cn/$CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH == "master"
+      variables:
+        SRC_PATH: cn/build
+        DEST_PATH: apps/tap-sdk-doc/prod
   needs:
     - build_cn
-  only:
-    - master
-  interruptible: true
-  extends:
-    - .upload-to-aliyun-oss
-    - .mixin_cn_rule
-  variables:
-    ALIYUN_OSS_BUCKET: tap-assets-cn
-    ALIYUN_OSS_ENDPOINT: oss-cn-beijing.aliyuncs.com
-    SRC_PATH: others/developer-center/dist
-    DEST_PATH: dview
 
-# deploy rnd
-deploy-staging:
-  stage: deploy
+mr_slack_cn:
+  stage: upload
+  extends: .mixin_slack
+  variables:
+    BUILD_LOCATION: cn
+  needs:
+    - upload_assets_cn
+
+deploy_rnd_cn:
+  stage: upload
   extends: 
-    - .deploy-kubefiles-staging
+    - .mixin_upload
     - .mixin_cn_rule
-  variables:
-    PROJECT_PATH: tds/tapsdkdoc
-  when: on_success
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      variables:
+        SRC_PATH: cn/build
+        DEST_PATH: apps/tap-sdk-doc/rnd
+  needs:
+    - build_cn
 
-# deploy 线上
-deploy-cn:
-  stage: deploy
+
+# hk 构建
+build_hk:
+  stage: build
   extends: 
-    - .deploy-kubefiles-production
-    - .mixin_cn_rule
+    - .mixin_build
+    - .mixin_hk_rule
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        CDN_PATH: https://assets.tapimg.com/apps/tap-sdk-doc/mr/hk/$CI_MERGE_REQUEST_ID
+        APP_PUBLIC_PATH: https://developer.xdrnd.com
+        APP_ROUTER_BASE_URL: /docs/tapsdk-hk-$CI_MERGE_REQUEST_ID/
+    - if: $CI_COMMIT_BRANCH == "master"
+      variables:
+        CDN_PATH: https://assets.tapimg.com/apps/tap-sdk-doc/prod
+        APP_PUBLIC_PATH: https://developer.taptap.cn
+        APP_ROUTER_BASE_URL: /docs/
+  script:
+    - yarn run build-hk:preview
+  artifacts:
+    paths:
+      - hk/build
+
+upload_assets_hk:
+  stage: upload
+  extends: 
+    - .mixin_upload
+    - .mixin_hk_rule
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        SRC_PATH: hk/build
+        DEST_PATH: apps/tap-sdk-doc/mr/hk/$CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH == "master"
+      variables:
+        SRC_PATH: hk/build
+        DEST_PATH: apps/tap-sdk-doc/prod
+  needs:
+    - build_hk
+
+mr_slack_hk:
+  stage: upload
+  extends: .mixin_slack
   variables:
-    PROJECT_PATH: tds/tapsdkdoc
-  when: on_success
-  only:
-    - master
+    BUILD_LOCATION: intl
+  needs:
+    - upload_assets_hk
 
 
-
+deploy_rnd_hk:
+  stage: upload
+  extends: 
+    - .mixin_upload
+    - .mixin_hk_rule
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      variables:
+        SRC_PATH: hk/build
+        DEST_PATH: apps/tap-sdk-doc/rnd
+  needs:
+    - build_hk

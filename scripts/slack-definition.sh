@@ -2,7 +2,7 @@
 source ./scripts/HASH.sh
 export DIST_HASH="$NOW_HASH"
 # 设置目标 url 链接
-export TARGET_URL="https://tds-preview.xdrnd.com/$DIST_HASH/"
+export TARGET_URL="$APP_PUBLIC_PATH$APP_ROUTER_BASE_URL"
 # 获取 commit 日志
 git fetch
 SOURCE_HASH=$(git rev-parse HEAD)

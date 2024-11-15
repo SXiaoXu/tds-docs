@@ -5,9 +5,6 @@
     - export NODE_OPTIONS=--max_old_space_size=4096
     - yarn install
 
-.mixin_except_lokalise:
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 .mixin_build:
   stage: build
@@ -16,10 +13,6 @@
     name: independent
   extends:
     - .mix_install_deps
-    - .mixin_except_lokalise
-  rules:
-    - changes:
-        - "**/*"
   artifacts:
     expire_in: 1 week
 
@@ -31,13 +24,13 @@
     GIT_STRATEGY: none
   extends:
     - .upload-to-aliyun-oss
-    - .mixin_except_lokalise
 
 .mixin_slack:
   stage: version
   extends:
     - .mix_install_deps
-    - .mixin_except_lokalise
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - source ./scripts/slack-definition.sh
     - chmod -R 777 ./scripts && ./scripts/slack-notification
