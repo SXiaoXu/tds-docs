@@ -21,12 +21,10 @@ build_cn:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
-        CDN_PATH: https://assets.tapimg.com/apps/tap-sdk-doc/mr/cn/$CI_MERGE_REQUEST_ID
-        APP_PUBLIC_PATH: https://developer.xdrnd.com
-        APP_ROUTER_BASE_URL: /docs/tapsdk-cn-$CI_MERGE_REQUEST_ID/
+        APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
+        APP_ROUTER_BASE_URL: /tapsdk-doc-cn-$CI_MERGE_REQUEST_ID/
     - if: $CI_COMMIT_BRANCH == "master"
       variables:
-        CDN_PATH: https://assets.tapimg.com/apps/tap-sdk-doc/prod
         APP_PUBLIC_PATH: https://developer.taptap.cn
         APP_ROUTER_BASE_URL: /docs/
   script:
@@ -64,7 +62,22 @@ mr_slack_cn:
   needs:
     - upload_assets_cn
 
-deploy_rnd_cn:
+build_rnd:
+  stage: build
+  extends: 
+    - .mixin_build
+    - .mixin_cn_rule
+  when: manual
+  variables:
+      APP_PUBLIC_PATH: https://developer.xdrnd.cn
+      APP_ROUTER_BASE_URL: /docs/
+  script:
+    - yarn run build-cn:preview
+  artifacts:
+    paths:
+      - cn/build
+
+upload_assets_rnd:
   stage: upload
   extends: 
     - .mixin_upload
@@ -72,13 +85,10 @@ deploy_rnd_cn:
   variables:
     ALIYUN_OSS_BUCKET: tap-assets-cn
     ALIYUN_OSS_ENDPOINT: oss-accelerate.aliyuncs.com
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master"
-      variables:
-        SRC_PATH: cn/build
-        DEST_PATH: apps/tap-sdk-doc/rnd
+    SRC_PATH: cn/build
+    DEST_PATH: apps/tap-sdk-doc/rnd/cn
   needs:
-    - build_cn
+    - build_rnd
 
 
 # hk 构建
@@ -90,12 +100,10 @@ build_hk:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
-        CDN_PATH: https://assets.tapimg.com/apps/tap-sdk-doc/mr/hk/$CI_MERGE_REQUEST_ID
         APP_PUBLIC_PATH: https://developer.xdrnd.com
         APP_ROUTER_BASE_URL: /docs/tapsdk-hk-$CI_MERGE_REQUEST_ID/
     - if: $CI_COMMIT_BRANCH == "master"
       variables:
-        CDN_PATH: https://assets.tapimg.com/apps/tap-sdk-doc/prod
         APP_PUBLIC_PATH: https://developer.taptap.cn
         APP_ROUTER_BASE_URL: /docs/
   script:

@@ -8,11 +8,11 @@
     - yarn install --cache-folder .yarn-cache
   cache:
     - key:
-      files:
-      - yarn.lock
-      - .npmrc
-    paths:
-      - .yarn-cache
+        files:
+          - yarn.lock
+          - .npmrc
+      paths:
+        - .yarn-cache
 
 
 .mixin_build:
