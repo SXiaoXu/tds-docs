@@ -10,6 +10,7 @@ stages:
   - build
   - upload
   - deploy
+  - notification
 
 # 国内 构建
 build_cn:
@@ -39,6 +40,10 @@ upload_assets_cn:
   extends: 
     - .mixin_upload
     - .mixin_cn_rule
+  variables:
+    GIT_STRATEGY: none
+    ALIYUN_OSS_BUCKET: tap-assets-cn
+    ALIYUN_OSS_ENDPOINT: oss-accelerate.aliyuncs.com
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
@@ -52,7 +57,7 @@ upload_assets_cn:
     - build_cn
 
 mr_slack_cn:
-  stage: upload
+  stage: notification
   extends: .mixin_slack
   variables:
     BUILD_LOCATION: cn
@@ -64,6 +69,9 @@ deploy_rnd_cn:
   extends: 
     - .mixin_upload
     - .mixin_cn_rule
+  variables:
+    ALIYUN_OSS_BUCKET: tap-assets-cn
+    ALIYUN_OSS_ENDPOINT: oss-accelerate.aliyuncs.com
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       variables:
@@ -101,6 +109,10 @@ upload_assets_hk:
   extends: 
     - .mixin_upload
     - .mixin_hk_rule
+  variables:
+    GIT_STRATEGY: none
+    ALIYUN_OSS_BUCKET: tap-assets-cn
+    ALIYUN_OSS_ENDPOINT: oss-accelerate.aliyuncs.com
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
@@ -114,7 +126,7 @@ upload_assets_hk:
     - build_hk
 
 mr_slack_hk:
-  stage: upload
+  stage: notification
   extends: .mixin_slack
   variables:
     BUILD_LOCATION: intl
@@ -127,6 +139,9 @@ deploy_rnd_hk:
   extends: 
     - .mixin_upload
     - .mixin_hk_rule
+  variables:
+    ALIYUN_OSS_BUCKET: tap-assets-cn
+    ALIYUN_OSS_ENDPOINT: oss-accelerate.aliyuncs.com
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
       variables:

@@ -26,7 +26,6 @@
     - .upload-to-aliyun-oss
 
 .mixin_slack:
-  stage: version
   extends:
     - .mix_install_deps
   rules:
