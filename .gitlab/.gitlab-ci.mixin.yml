@@ -9,7 +9,7 @@
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-.default_build:
+.mixin_build:
   stage: build
   interruptible: true
   environment:
@@ -23,7 +23,7 @@
   artifacts:
     expire_in: 1 week
 
-.default_upload:
+.mixin_upload:
   stage: image-assets
   environment:
     name: independent
@@ -33,7 +33,7 @@
     - .upload-to-aliyun-oss
     - .mixin_except_lokalise
 
-.default_slack:
+.mixin_slack:
   stage: version
   extends:
     - .mix_install_deps
@@ -42,3 +42,21 @@
     - source ./scripts/slack-definition.sh
     - chmod -R 777 ./scripts && ./scripts/slack-notification
   when: manual
+
+
+.mixin_cn_rule:
+  rules:
+    - changes:
+        - "**/*"
+    - changes:
+        - hk/**
+      when: never
+
+
+.mixin_hk_rule:
+  rules:
+    - changes:
+        - "**/*"
+    - changes:
+        - cn/**
+      when: never

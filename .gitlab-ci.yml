@@ -7,38 +7,33 @@ include:
       - /shared/upload-to-aliyun-oss.yml
   - .gitlab/.gitlab-ci.mixin.yml
 
-stages:
-  - image
-  - deploy-staging
-  - deploy-production
-  - build
-  - image-assets
-  - version
-
 variables:
   ALIYUN_OSS_BUCKET: tds-abd-sh
   ALIYUN_OSS_ENDPOINT: oss-cn-shanghai-internal.aliyuncs.com
 
+stages:
+  - build
+  - upload
+  - deploy
+
 # 国内预览环境构建
 build_mr_cn:
-  extends: .default_build
+  stage: build
+  extends: 
+    - .mixin_build
+    - .mixin_cn_rule
   variables:
     PREVIEW_PREFIX: tapsdk-doc-cn
   script:
     - source ./scripts/make-preview.sh preview
     - yarn run build-cn:preview
-  rules:
-    - changes:
-        - "**/*"
-    - changes:
-        - hk/**
-      when: never
   artifacts:
     paths:
       - cn/build
 
 upload-assets-mr-cn:
-  extends: .default_upload
+  stage: upload
+  extends: .mixin_upload
   variables:
     SRC_PATH: cn/build
     DEST_PATH: preview/tapsdk-doc-cn-$CI_MERGE_REQUEST_ID
@@ -46,31 +41,32 @@ upload-assets-mr-cn:
     - build_mr_cn
 
 mr_slack_cn:
-  extends: .default_slack
+  stage: upload
+  extends: .mixin_slack
   variables:
     PREVIEW_PREFIX: tapsdk-doc-cn
     BUILD_LOCATION: cn
+  needs:
+    - upload-assets-mr-cn
 
 # hk预览环境构建
 build_mr_hk:
-  extends: .default_build
+  stage: build
+  extends: 
+    - .mixin_build
+    - .mixin_hk_rule
   variables:
     PREVIEW_PREFIX: tapsdk-doc-intl
   script:
     - source ./scripts/make-preview.sh preview
     - yarn run build-hk:preview
-  rules:
-    - changes:
-        - "**/*"
-    - changes:
-        - cn/**
-      when: never
   artifacts:
     paths:
       - hk/build
 
 upload-assets-mr-hk:
-  extends: .default_upload
+  stage: upload
+  extends: .mixin_upload
   variables:
     SRC_PATH: hk/build
     DEST_PATH: preview/tapsdk-doc-intl-$CI_MERGE_REQUEST_ID
@@ -78,37 +74,67 @@ upload-assets-mr-hk:
     - build_mr_hk
 
 mr_slack_hk:
-  extends: .default_slack
+  stage: upload
+  extends: .mixin_slack
   variables:
     PREVIEW_PREFIX: tapsdk-doc-intl
     BUILD_LOCATION: intl
+  needs:
+    - upload-assets-mr-hk
 
-# 线上环境构建
-build-and-push-image:
-  stage: image
-  extends:
-    - .build-and-push-image
-  variables:
-    DOCKER_REGISTRY_NAMESPACE: tds
-    DOCKER_REGISTRY_REPO: tapsdkdoc
+# cn线上环境构建
+build_cn:
+  stage: build
+  extends: 
+    - .mixin_build
+    - .mixin_cn_rule
+  script:
+    - yarn run build-cn
+  artifacts:
+    paths:
+      - cn/build
   only:
     - master
 
-deploy-staging:
-  stage: deploy-staging
+upload-assets-cn:
+  stage: upload
+  needs:
+    - build_cn
+  only:
+    - master
+  interruptible: true
   extends:
+    - .upload-to-aliyun-oss
+    - .mixin_cn_rule
+  variables:
+    ALIYUN_OSS_BUCKET: tap-assets-cn
+    ALIYUN_OSS_ENDPOINT: oss-cn-beijing.aliyuncs.com
+    SRC_PATH: others/developer-center/dist
+    DEST_PATH: dview
+
+# deploy rnd
+deploy-staging:
+  stage: deploy
+  extends: 
     - .deploy-kubefiles-staging
+    - .mixin_cn_rule
   variables:
     PROJECT_PATH: tds/tapsdkdoc
   when: on_success
   only:
     - master
 
-deploy-production:
-  stage: deploy-production
-  extends:
+# deploy 线上
+deploy-cn:
+  stage: deploy
+  extends: 
     - .deploy-kubefiles-production
+    - .mixin_cn_rule
   variables:
     PROJECT_PATH: tds/tapsdkdoc
+  when: on_success
   only:
     - master
+
+
+
