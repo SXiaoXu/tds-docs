@@ -46,7 +46,7 @@ upload_assets_cn:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
         SRC_PATH: cn/build
-        DEST_PATH: apps/tap-sdk-doc/mr/cn/$CI_MERGE_REQUEST_ID
+        DEST_PATH: apps/tap-sdk-doc/mr/tapsdk-doc-cn-$CI_MERGE_REQUEST_ID
     - if: $CI_COMMIT_BRANCH == "master"
       variables:
         SRC_PATH: cn/build
@@ -100,8 +100,8 @@ build_hk:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
-        APP_PUBLIC_PATH: https://developer.xdrnd.com
-        APP_ROUTER_BASE_URL: /docs/tapsdk-hk-$CI_MERGE_REQUEST_ID/
+        APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
+        APP_ROUTER_BASE_URL:  /tapsdk-doc-hk-$CI_MERGE_REQUEST_ID/
     - if: $CI_COMMIT_BRANCH == "master"
       variables:
         APP_PUBLIC_PATH: https://developer.taptap.cn
@@ -125,7 +125,7 @@ upload_assets_hk:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
         SRC_PATH: hk/build
-        DEST_PATH: apps/tap-sdk-doc/mr/hk/$CI_MERGE_REQUEST_ID
+        DEST_PATH: apps/tap-sdk-doc/mr/tapsdk-doc-hk-$CI_MERGE_REQUEST_ID
     - if: $CI_COMMIT_BRANCH == "master"
       variables:
         SRC_PATH: hk/build
@@ -137,7 +137,7 @@ mr_slack_hk:
   stage: notification
   extends: .mixin_slack
   variables:
-    BUILD_LOCATION: intl
+    BUILD_LOCATION: hk
   needs:
     - upload_assets_hk
 

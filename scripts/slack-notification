@@ -64,7 +64,7 @@ const getTargetSlackInfo = async () => {
   }
   const mainList = await getTargetMergeRequestDescription();
   const allAvaList = await getTargetSlackInfo();
-  const targetUrlIntl = targetUrl.replace("tapsdk-doc-cn", "tapsdk-doc-intl");
+  const targetUrlIntl = targetUrl.replace("tapsdk-doc-cn", "tapsdk-doc-hk");
   let markdown = `
  ${
    process.env.BUILD_LOCATION === "cn"
@@ -72,7 +72,7 @@ const getTargetSlackInfo = async () => {
      : ""
  }
  ${
-   process.env.BUILD_LOCATION === "intl"
+   process.env.BUILD_LOCATION === "hk"
      ? `# 最新 海外 url : [点击这里](${targetUrlIntl})`
      : ""
  }
