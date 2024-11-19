@@ -19,6 +19,6 @@ echo "check: $SOURCE_HASH...$TARGET_HASH"
 # 还原 branch 状态
 git checkout $SOURCE_HASH
 # 输出已经被定义的变量
-echo "$LAST_COMMIT"
-echo "$DIST_HASH"
-echo "$TARGET_URL"
+echo "LAST_COMMIT $LAST_COMMIT"
+echo "DIST_HASH $DIST_HASH"
+echo "TARGET_URL $TARGET_URL"
