@@ -68,7 +68,7 @@ build_hk:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
         APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
-        APP_ROUTER_BASE_URL:  /tapsdk-doc-hk-$CI_MERGE_REQUEST_ID/
+        APP_ROUTER_BASE_URL:  /tapsdk-doc-intl-$CI_MERGE_REQUEST_ID/
     - if: $CI_COMMIT_BRANCH == "master"
       variables:
         APP_PUBLIC_PATH: https://developer.taptap.cn
@@ -208,6 +208,8 @@ deploy_rnd_cn:
   stage: deploy
   extends: 
     - .deploy-kubefiles-staging
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   environment:
     name: cn/staging
   variables:
