@@ -2,7 +2,6 @@
 source ./scripts/HASH.sh
 export DIST_HASH="$NOW_HASH"
 # 设置目标 url 链接
-export TARGET_URL="$APP_PUBLIC_PATH$APP_ROUTER_BASE_URL"
 # 获取 commit 日志
 git fetch
 SOURCE_HASH=$(git rev-parse HEAD)
@@ -21,4 +20,3 @@ git checkout $SOURCE_HASH
 # 输出已经被定义的变量
 echo "LAST_COMMIT $LAST_COMMIT"
 echo "DIST_HASH $DIST_HASH"
-echo "TARGET_URL $TARGET_URL"
