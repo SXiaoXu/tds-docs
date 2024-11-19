@@ -39,6 +39,8 @@ upload_mr_assets_cn:
   extends: 
     - .mixin_upload
     - .mixin_cn_rule
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     ALIYUN_OSS_BUCKET: tds-abd-sh
     ALIYUN_OSS_ENDPOINT: oss-cn-shanghai-internal.aliyuncs.com
@@ -84,6 +86,8 @@ upload_mr_assets_hk:
   extends: 
     - .mixin_upload
     - .mixin_hk_rule
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     GIT_STRATEGY: none
     ALIYUN_OSS_BUCKET: tds-abd-sh
@@ -189,7 +193,8 @@ docker_upload_rnd:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
-    DOCKER_REGISTRY_REPO: tapsdk-doc/cn
+    DOCKER_REGISTRY_NAMESPACE: web-frontend
+    DOCKER_REGISTRY_REPO: tapsdk-doc-cn
     DOCKERFILE: cn.Dockerfile
     DOCKER_BUILD_PATH: .
   needs:
