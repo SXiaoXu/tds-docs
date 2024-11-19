@@ -79,24 +79,17 @@ build_hk:
     paths:
       - hk/build
 
-upload_assets_hk:
+upload_mr_assets_hk:
   stage: upload
   extends: 
     - .mixin_upload
     - .mixin_hk_rule
   variables:
     GIT_STRATEGY: none
-    ALIYUN_OSS_BUCKET: tap-assets-cn
-    ALIYUN_OSS_ENDPOINT: oss-accelerate.aliyuncs.com
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      variables:
-        SRC_PATH: hk/build
-        DEST_PATH: apps/tap-sdk-doc/mr/tapsdk-doc-hk-$CI_MERGE_REQUEST_ID
-    - if: $CI_COMMIT_BRANCH == "master"
-      variables:
-        SRC_PATH: hk/build
-        DEST_PATH: apps/tap-sdk-doc/prod
+    ALIYUN_OSS_BUCKET: tds-abd-sh
+    ALIYUN_OSS_ENDPOINT: oss-cn-shanghai-internal.aliyuncs.com
+    SRC_PATH: hk/build
+    DEST_PATH: preview/tapsdk-doc-intl-$CI_MERGE_REQUEST_ID
   needs:
     - build_hk
 
@@ -106,7 +99,7 @@ mr_slack_hk:
   variables:
     BUILD_LOCATION: hk
   needs:
-    - upload_assets_hk
+    - upload_mr_assets_hk
 
 
 # docker build cn
@@ -178,10 +171,10 @@ build_rnd_cn:
     - .mixin_build
     - .mixin_cn_rule
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      variables:
-        APP_PUBLIC_PATH: https://developer.xdrnd.cn
-        APP_ROUTER_BASE_URL: /docs/
+    - if: $CI_COMMIT_BRANCH == "master"
+  variables:
+    APP_PUBLIC_PATH: https://developer.xdrnd.cn
+    APP_ROUTER_BASE_URL: /docs/
   script:
     - yarn run build-cn:preview
   artifacts:
@@ -194,7 +187,7 @@ docker_upload_rnd:
     - .mixin_cn_rule
     - .build-and-push-image
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_REPO: tapsdk-doc/cn
     DOCKERFILE: cn.Dockerfile
@@ -207,9 +200,10 @@ docker_upload_rnd:
 deploy_rnd_cn:
   stage: deploy
   extends: 
+    - .mixin_cn_rule
     - .deploy-kubefiles-staging
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "master"
   environment:
     name: cn/staging
   variables:
