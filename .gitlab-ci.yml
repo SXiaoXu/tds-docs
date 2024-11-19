@@ -171,6 +171,23 @@ deploy_hk:
 
 
 # docker build cn rnd
+build_rnd_cn:
+  when: manual
+  stage: build
+  extends: 
+    - .mixin_build
+    - .mixin_cn_rule
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        APP_PUBLIC_PATH: https://developer.xdrnd.cn
+        APP_ROUTER_BASE_URL: /docs/
+  script:
+    - yarn run build-cn:preview
+  artifacts:
+    paths:
+      - cn/build
+
 docker_upload_rnd:
   stage: upload
   extends: 
@@ -178,7 +195,6 @@ docker_upload_rnd:
     - .build-and-push-image
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  when: manual
   variables:
     DOCKER_REGISTRY_REPO: tapsdk-doc/cn
     DOCKERFILE: cn.Dockerfile
