@@ -1,0 +1,63 @@
+.mix_install_deps:
+  interruptible: true
+  image: taptap-img-registry.cn-beijing.cr.aliyuncs.com/public/node-abd-common:4.0.0
+  tags: 
+    - node
+  before_script:
+    - export NODE_OPTIONS=--max_old_space_size=4096
+    - yarn install --cache-folder .yarn-cache
+  cache:
+    - key:
+        files:
+          - yarn.lock
+          - .npmrc
+      paths:
+        - .yarn-cache
+
+
+.mixin_build:
+  stage: build
+  interruptible: true
+  environment:
+    name: independent
+  extends:
+    - .mix_install_deps
+  artifacts:
+    expire_in: 1 week
+
+.mixin_upload:
+  stage: image-assets
+  environment:
+    name: independent
+  variables:
+    GIT_STRATEGY: none
+  extends:
+    - .upload-to-aliyun-oss
+
+.mixin_slack:
+  extends:
+    - .mix_install_deps
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - source ./scripts/slack-definition.sh
+    - chmod -R 777 ./scripts && ./scripts/slack-notification
+  when: manual
+
+
+.mixin_cn_rule:
+  rules:
+    - changes:
+        - "**/*"
+    - changes:
+        - hk/**
+      when: never
+
+
+.mixin_hk_rule:
+  rules:
+    - changes:
+        - "**/*"
+    - changes:
+        - cn/**
+      when: never
