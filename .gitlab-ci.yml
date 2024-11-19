@@ -54,11 +54,10 @@ mr_slack_cn:
   extends: .mixin_slack
   variables:
     BUILD_LOCATION: cn
+    APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
+    APP_ROUTER_BASE_URL: /tapsdk-doc-cn-$CI_MERGE_REQUEST_ID/
   needs:
     - upload_mr_assets_cn
-
-
-
 
 # hk 构建
 build_hk:
@@ -102,6 +101,8 @@ mr_slack_hk:
   extends: .mixin_slack
   variables:
     BUILD_LOCATION: hk
+    APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
+    APP_ROUTER_BASE_URL:  /tapsdk-doc-intl-$CI_MERGE_REQUEST_ID/
   needs:
     - upload_mr_assets_hk
 
@@ -262,7 +263,7 @@ deploy_rnd_hk:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
   environment:
-    name: hk/staging
+    name: staging
   variables:
     PROJECT_PATH: tds/tapsdkdoc
     VALUE_FILENAME: rnd_intl_values.yaml
