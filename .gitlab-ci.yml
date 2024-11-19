@@ -2,6 +2,7 @@ include:
   - project: sre/gitlab-ci-templates
     ref: v1
     file:
+      - /shared/build-and-push-image.yml
       - /shared/deploy-kubefiles.yml
       - /shared/upload-to-aliyun-oss.yml
   - .gitlab/.gitlab-ci.mixin.yml
@@ -33,24 +34,16 @@ build_cn:
     paths:
       - cn/build
 
-upload_assets_cn:
+upload_mr_assets_cn:
   stage: upload
   extends: 
     - .mixin_upload
     - .mixin_cn_rule
   variables:
-    GIT_STRATEGY: none
-    ALIYUN_OSS_BUCKET: tap-assets-cn
-    ALIYUN_OSS_ENDPOINT: oss-accelerate.aliyuncs.com
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      variables:
-        SRC_PATH: cn/build
-        DEST_PATH: apps/tap-sdk-doc/mr/tapsdk-doc-cn-$CI_MERGE_REQUEST_ID
-    - if: $CI_COMMIT_BRANCH == "master"
-      variables:
-        SRC_PATH: cn/build
-        DEST_PATH: apps/tap-sdk-doc/prod
+    ALIYUN_OSS_BUCKET: tds-abd-sh
+    ALIYUN_OSS_ENDPOINT: oss-cn-shanghai-internal.aliyuncs.com
+    SRC_PATH: cn/build
+    DEST_PATH: preview/tapsdk-doc-cn-$CI_MERGE_REQUEST_ID
   needs:
     - build_cn
 
@@ -60,35 +53,9 @@ mr_slack_cn:
   variables:
     BUILD_LOCATION: cn
   needs:
-    - upload_assets_cn
+    - upload_mr_assets_cn
 
-build_rnd:
-  stage: build
-  extends: 
-    - .mixin_build
-    - .mixin_cn_rule
-  when: manual
-  variables:
-      APP_PUBLIC_PATH: https://developer.xdrnd.cn
-      APP_ROUTER_BASE_URL: /docs/
-  script:
-    - yarn run build-cn:preview
-  artifacts:
-    paths:
-      - cn/build
 
-upload_assets_rnd:
-  stage: upload
-  extends: 
-    - .mixin_upload
-    - .mixin_cn_rule
-  variables:
-    ALIYUN_OSS_BUCKET: tap-assets-cn
-    ALIYUN_OSS_ENDPOINT: oss-accelerate.aliyuncs.com
-    SRC_PATH: cn/build
-    DEST_PATH: apps/tap-sdk-doc/rnd/cn
-  needs:
-    - build_rnd
 
 
 # hk 构建
@@ -142,18 +109,94 @@ mr_slack_hk:
     - upload_assets_hk
 
 
-deploy_rnd_hk:
+# docker build cn
+docker_upload_cn:
   stage: upload
   extends: 
-    - .mixin_upload
-    - .mixin_hk_rule
-  variables:
-    ALIYUN_OSS_BUCKET: tap-assets-cn
-    ALIYUN_OSS_ENDPOINT: oss-accelerate.aliyuncs.com
+    - .mixin_cn_rule
+    - .build-and-push-image
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
-      variables:
-        SRC_PATH: hk/build
-        DEST_PATH: apps/tap-sdk-doc/rnd
+  variables:
+    DOCKER_REGISTRY_REPO: tapsdk-doc/cn
+    DOCKERFILE: cn.Dockerfile
+    DOCKER_BUILD_PATH: .
+  needs:
+    - build_cn
+  dependencies:
+    - build_cn
+
+deploy_cn:
+  stage: deploy
+  extends: 
+    - .deploy-kubefiles-production
+  environment:
+    name: cn/production
+  variables:
+    PROJECT_PATH: tds/tapsdkdoc
+    VALUE_FILENAME: bj_values.yaml
+  needs:
+    - docker_upload_cn
+  when: manual
+
+# docker build hk
+docker_upload_hk:
+  stage: upload
+  extends: 
+    - .mixin_hk_rule
+    - .build-and-push-image
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+  variables:
+    DOCKER_REGISTRY_REPO: tapsdk-doc/hk
+    DOCKERFILE: hk.Dockerfile
+    DOCKER_BUILD_PATH: .
   needs:
     - build_hk
+  dependencies:
+    - build_hk
+
+deploy_hk:
+  stage: deploy
+  extends: 
+    - .deploy-kubefiles-production
+  environment:
+    name: hk/production
+  variables:
+    PROJECT_PATH: tds/tapsdkdoc
+    VALUE_FILENAME: hk_values.yaml
+  needs:
+    - docker_upload_hk
+  when: manual
+
+
+# docker build cn rnd
+docker_upload_rnd:
+  stage: upload
+  extends: 
+    - .mixin_cn_rule
+    - .build-and-push-image
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  when: manual
+  variables:
+    DOCKER_REGISTRY_REPO: tapsdk-doc/cn
+    DOCKERFILE: cn.Dockerfile
+    DOCKER_BUILD_PATH: .
+  needs:
+    - build_rnd_cn
+  dependencies:
+    - build_rnd_cn
+
+deploy_rnd_cn:
+  stage: deploy
+  extends: 
+    - .deploy-kubefiles-staging
+  environment:
+    name: cn/staging
+  variables:
+    PROJECT_PATH: tds/tapsdkdoc
+    VALUE_FILENAME: rnd_values.yaml
+  needs:
+    - docker_upload_rnd
+  when: manual
