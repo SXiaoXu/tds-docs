@@ -6,20 +6,20 @@ include:
       - /shared/deploy-kubefiles.yml
       - /shared/upload-to-aliyun-oss.yml
   - .gitlab/.gitlab-ci.mixin.yml
-
 stages:
   - build
   - upload
   - deploy
   - notification
-
 # 国内 构建
 build_cn:
   stage: build
-  extends: 
+  extends:
     - .mixin_build
-    - .mixin_cn_rule
   rules:
+    - changes:
+        - "hk/**/*"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
         APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
@@ -33,13 +33,14 @@ build_cn:
   artifacts:
     paths:
       - cn/build
-
 upload_mr_assets_cn:
   stage: upload
-  extends: 
+  extends:
     - .mixin_upload
-    - .mixin_cn_rule
   rules:
+    - changes:
+        - "hk/**/*"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     ALIYUN_OSS_BUCKET: tds-abd-sh
@@ -48,28 +49,33 @@ upload_mr_assets_cn:
     DEST_PATH: preview/tapsdk-doc-cn-$CI_MERGE_REQUEST_ID
   needs:
     - build_cn
-
 mr_slack_cn:
   stage: notification
   extends: .mixin_slack
+  rules:
+    - changes:
+        - "hk/**/*"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     BUILD_LOCATION: cn
     APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
     APP_ROUTER_BASE_URL: /tapsdk-doc-cn-$CI_MERGE_REQUEST_ID/
   needs:
     - upload_mr_assets_cn
-
 # hk 构建
 build_hk:
   stage: build
-  extends: 
+  extends:
     - .mixin_build
-    - .mixin_hk_rule
   rules:
+    - changes:
+        - "cn/**/*"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
         APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
-        APP_ROUTER_BASE_URL:  /tapsdk-doc-intl-$CI_MERGE_REQUEST_ID/
+        APP_ROUTER_BASE_URL: /tapsdk-doc-intl-$CI_MERGE_REQUEST_ID/
     - if: $CI_COMMIT_BRANCH == "master"
       variables:
         APP_PUBLIC_PATH: https://developer.taptap.cn
@@ -79,13 +85,14 @@ build_hk:
   artifacts:
     paths:
       - hk/build
-
 upload_mr_assets_hk:
   stage: upload
-  extends: 
+  extends:
     - .mixin_upload
-    - .mixin_hk_rule
   rules:
+    - changes:
+        - "cn/**/*"
+      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     GIT_STRATEGY: none
@@ -95,25 +102,29 @@ upload_mr_assets_hk:
     DEST_PATH: preview/tapsdk-doc-intl-$CI_MERGE_REQUEST_ID
   needs:
     - build_hk
-
 mr_slack_hk:
   stage: notification
   extends: .mixin_slack
+  rules:
+    - changes:
+        - "cn/**/*"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     BUILD_LOCATION: hk
     APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
-    APP_ROUTER_BASE_URL:  /tapsdk-doc-intl-$CI_MERGE_REQUEST_ID/
+    APP_ROUTER_BASE_URL: /tapsdk-doc-intl-$CI_MERGE_REQUEST_ID/
   needs:
     - upload_mr_assets_hk
-
-
 # docker build cn
 docker_upload_cn:
   stage: upload
-  extends: 
-    - .mixin_cn_rule
+  extends:
     - .build-and-push-image
   rules:
+    - changes:
+        - "hk/**/*"
+      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_REPO: tapsdk-doc/cn
@@ -123,10 +134,9 @@ docker_upload_cn:
     - build_cn
   dependencies:
     - build_cn
-
 deploy_cn:
   stage: deploy
-  extends: 
+  extends:
     - .deploy-kubefiles-production
   environment:
     name: cn/production
@@ -136,14 +146,15 @@ deploy_cn:
   needs:
     - docker_upload_cn
   when: manual
-
 # docker build hk
 docker_upload_hk:
   stage: upload
-  extends: 
-    - .mixin_hk_rule
+  extends:
     - .build-and-push-image
   rules:
+    - changes:
+        - "cn/**/*"
+      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_REPO: tapsdk-doc/hk
@@ -153,10 +164,9 @@ docker_upload_hk:
     - build_hk
   dependencies:
     - build_hk
-
 deploy_hk:
   stage: deploy
-  extends: 
+  extends:
     - .deploy-kubefiles-production
   environment:
     name: hk/production
@@ -166,16 +176,16 @@ deploy_hk:
   needs:
     - docker_upload_hk
   when: manual
-
-
 # docker build cn rnd
 build_rnd_cn:
   when: manual
   stage: build
-  extends: 
+  extends:
     - .mixin_build
-    - .mixin_cn_rule
   rules:
+    - changes:
+        - "hk/**/*"
+      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     APP_PUBLIC_PATH: https://developer.xdrnd.cn
@@ -185,13 +195,14 @@ build_rnd_cn:
   artifacts:
     paths:
       - cn/build
-
 docker_upload_rnd_cn:
   stage: upload
-  extends: 
-    - .mixin_cn_rule
+  extends:
     - .build-and-push-image
   rules:
+    - changes:
+        - "hk/**/*"
+      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_NAMESPACE: web-frontend
@@ -202,13 +213,14 @@ docker_upload_rnd_cn:
     - build_rnd_cn
   dependencies:
     - build_rnd_cn
-
 deploy_rnd_cn:
   stage: deploy
-  extends: 
-    - .mixin_cn_rule
+  extends:
     - .deploy-kubefiles-staging
   rules:
+    - changes:
+        - "hk/**/*"
+      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   environment:
     name: cn/staging
@@ -218,16 +230,16 @@ deploy_rnd_cn:
   needs:
     - docker_upload_rnd_cn
   when: manual
-
-
   # docker build hk rnd
 build_rnd_hk:
   when: manual
   stage: build
-  extends: 
+  extends:
     - .mixin_build
-    - .mixin_hk_rule
   rules:
+    - changes:
+        - "cn/**/*"
+      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     APP_PUBLIC_PATH: https://developer-intl.xdrnd.com
@@ -237,13 +249,14 @@ build_rnd_hk:
   artifacts:
     paths:
       - hk/build
-
 docker_upload_rnd_hk:
   stage: upload
-  extends: 
-    - .mixin_hk_rule
+  extends:
     - .build-and-push-image
   rules:
+    - changes:
+        - "cn/**/*"
+      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_NAMESPACE: web-frontend
@@ -254,13 +267,14 @@ docker_upload_rnd_hk:
     - build_rnd_hk
   dependencies:
     - build_rnd_hk
-
 deploy_rnd_hk:
   stage: deploy
-  extends: 
-    - .mixin_hk_rule
+  extends:
     - .deploy-kubefiles-staging
   rules:
+    - changes:
+        - "cn/**/*"
+      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   environment:
     name: hk/staging
