@@ -1,7 +1,7 @@
 .mix_install_deps:
   interruptible: true
   image: taptap-img-registry.cn-beijing.cr.aliyuncs.com/public/node-abd-common:4.0.0
-  tags: 
+  tags:
     - node
   before_script:
     - export NODE_OPTIONS=--max_old_space_size=4096
@@ -13,7 +13,6 @@
           - .npmrc
       paths:
         - .yarn-cache
-
 
 .mixin_build:
   stage: build
@@ -44,20 +43,20 @@
     - chmod -R 777 ./scripts && ./scripts/slack-notification
   when: manual
 
-
 .mixin_cn_rule:
   rules:
     - changes:
-        - "**/*"
+        - "*"
+      when: always
     - changes:
-        - hk/**
+        - hk/**/*
       when: never
-
 
 .mixin_hk_rule:
   rules:
     - changes:
-        - "**/*"
+        - "*"
+      when: always
     - changes:
-        - cn/**
+        - cn/**/*
       when: never
