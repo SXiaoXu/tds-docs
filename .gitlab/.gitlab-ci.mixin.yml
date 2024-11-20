@@ -51,6 +51,7 @@
     - changes:
         - hk/**/*
       when: never
+    - when: never
 
 .mixin_hk_rule:
   rules:
@@ -60,3 +61,4 @@
     - changes:
         - cn/**/*
       when: never
+    - when: never
