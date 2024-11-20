@@ -17,9 +17,6 @@ build_cn:
   extends:
     - .mixin_build
   rules:
-    - changes:
-        - "hk/**/*"
-      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
         APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
@@ -38,9 +35,6 @@ upload_mr_assets_cn:
   extends:
     - .mixin_upload
   rules:
-    - changes:
-        - "hk/**/*"
-      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     ALIYUN_OSS_BUCKET: tds-abd-sh
@@ -53,9 +47,6 @@ mr_slack_cn:
   stage: notification
   extends: .mixin_slack
   rules:
-    - changes:
-        - "hk/**/*"
-      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     BUILD_LOCATION: cn
@@ -69,9 +60,6 @@ build_hk:
   extends:
     - .mixin_build
   rules:
-    - changes:
-        - "cn/**/*"
-      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       variables:
         APP_PUBLIC_PATH: https://tds-preview.xdrnd.cn
@@ -90,9 +78,6 @@ upload_mr_assets_hk:
   extends:
     - .mixin_upload
   rules:
-    - changes:
-        - "cn/**/*"
-      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     GIT_STRATEGY: none
@@ -106,9 +91,6 @@ mr_slack_hk:
   stage: notification
   extends: .mixin_slack
   rules:
-    - changes:
-        - "cn/**/*"
-      when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     BUILD_LOCATION: hk
@@ -122,9 +104,6 @@ docker_upload_cn:
   extends:
     - .build-and-push-image
   rules:
-    - changes:
-        - "hk/**/*"
-      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_REPO: tapsdk-doc/cn
@@ -152,9 +131,6 @@ docker_upload_hk:
   extends:
     - .build-and-push-image
   rules:
-    - changes:
-        - "cn/**/*"
-      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_REPO: tapsdk-doc/hk
@@ -183,9 +159,6 @@ build_rnd_cn:
   extends:
     - .mixin_build
   rules:
-    - changes:
-        - "hk/**/*"
-      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     APP_PUBLIC_PATH: https://developer.xdrnd.cn
@@ -200,9 +173,6 @@ docker_upload_rnd_cn:
   extends:
     - .build-and-push-image
   rules:
-    - changes:
-        - "hk/**/*"
-      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_NAMESPACE: web-frontend
@@ -218,9 +188,6 @@ deploy_rnd_cn:
   extends:
     - .deploy-kubefiles-staging
   rules:
-    - changes:
-        - "hk/**/*"
-      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   environment:
     name: cn/staging
@@ -237,9 +204,6 @@ build_rnd_hk:
   extends:
     - .mixin_build
   rules:
-    - changes:
-        - "cn/**/*"
-      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     APP_PUBLIC_PATH: https://developer-intl.xdrnd.com
@@ -254,9 +218,6 @@ docker_upload_rnd_hk:
   extends:
     - .build-and-push-image
   rules:
-    - changes:
-        - "cn/**/*"
-      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_NAMESPACE: web-frontend
@@ -272,9 +233,6 @@ deploy_rnd_hk:
   extends:
     - .deploy-kubefiles-staging
   rules:
-    - changes:
-        - "cn/**/*"
-      when: never
     - if: $CI_COMMIT_BRANCH == "master"
   environment:
     name: hk/staging
