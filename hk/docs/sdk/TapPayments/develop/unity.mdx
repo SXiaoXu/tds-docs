@@ -15,8 +15,8 @@ import CodeBlock from '@theme/CodeBlock';
 
 ## 准备
 
-- 参照 [准备工作](/sdk/start/get-ready/) 所述创建 app，配置 app 参数并且绑定 API 域名
-- 参照 [TapSDK 快速开始](/sdk/start/quickstart/) 配置包名和签名
+- 参照 [准备工作](/sdk/access/get-ready/) 所述创建 app，配置 app 参数并且绑定 API 域名
+- 参照 [TapSDK 快速开始](/sdk/access/quickstart/) 配置包名和签名
 
 ## 获取 SDK
 
@@ -28,7 +28,7 @@ Unity 2020.3.15 之前的版本为了避免后面构建报错建议升级 Gradle
 
 ### 1、通过 Package Manager 可视化界面引入
 
-因为 TapPayment SDK 依赖 **EDM4U（External Dependency Manager for Unity）** 来处理 Android 相关的依赖，因此引入依赖的步骤是**先安装 EDM4U 库，然后安装 TapPayment SDK**。
+因为 TapTap IAP 依赖 **EDM4U（External Dependency Manager for Unity）** 来处理 Android 相关的依赖，因此引入依赖的步骤是**先安装 EDM4U 库，然后安装 TapTap IAP**。
 
 #### 安装 EDM4U
 
@@ -44,27 +44,27 @@ EDM4U 可以通过 OpenUPM 进行下载，开发者可以通过 **Edit > Project
 
 开发者可以通过 [Google APIs for Unity](https://developers.google.com/unity/archive#external_dependency_manager_for_unity) 下载 UPM 安装包. 并且通过[从本地磁盘安装](https://docs.unity3d.com/Manual/upm-ui-local.html)的方式进行安装。
 
-#### 安装 TapPayment SDK
+#### 安装 TapTap IAP
 
-TapPayment SDK 可以通过 NPMJS 进行安装, 开发者可以通过 **Edit > Project Settings > Package Manager** 来注册使用 NPMJS。
+TapTap IAP 可以通过 NPMJS 进行安装, 开发者可以通过 **Edit > Project Settings > Package Manager** 来注册使用 NPMJS。
 
-![](https://capacity-files.lcfile.com/sJDhXK4vAwAYX7BpQFh1SrQzeUmXk165/taptap.png)
+![](https://img.tapimg.com/market/images/4f0d11b80a358ff0f714b37a51d6007f.png)
 
 <>
   配置完成以后就可以在 <strong>Window &gt; Package Manager &gt; My Registries</strong> 中安装 <strong>TapTapSDK IAP {v4SDKVersions.tapGlobalPayments.unity}</strong>。
   如果安装目录中没有 <code>TapTap Payments Global V2</code>, 请尝试在 <strong>Edit &gt; Project Settings &gt; Package Manager</strong> 中重新注册 NPMJS。
 </>
 
-![](https://img.tapimg.com/market/images/cda0911e47723fba9bee9a29ef62260f.png)
+![](https://img.tapimg.com/market/images/58581dbaaf3b269c453b0781e3a22a55.png)
 
 
 ### 2、修改 Packages/manifest.json 文件
 
 <CodeBlock className="json">
   {` "dependencies": {
-    "com.taptap.sdk.iap": "${v4SDKVersions.tapGlobalPayments.unity}", //添加 TapPayment
-    "com.unity.purchasing": "3.1.0", //TapPayment 所须依赖
-    "com.google.external-dependency-manager": "1.2.179", //TapPayment 所须依赖
+    "com.taptap.sdk.iap": "${v4SDKVersions.tapGlobalPayments.unity}", //添加 TapTap IAP
+    "com.unity.purchasing": "3.1.0", //TapTap IAP 所须依赖
+    "com.google.external-dependency-manager": "1.2.179", //TapTap IAP 所须依赖
     "com.taptap.sdk.core": "${v4SDKVersions.tapGlobalPayments.unity}",
     ...
     ...
@@ -75,14 +75,12 @@ TapPayment SDK 可以通过 NPMJS 进行安装, 开发者可以通过 **Edit > P
     {
       "name": "taptap",
       "url": "https://registry.npmjs.org",
-      "scopes": ["com.tapsdk", "com.taptap", "com.leancloud"]
+      "scopes": ["com.taptap"]
     },
     {
       "name": "openupm",
       "url": "https://package.openupm.com",
-      "scopes": [
-        "com.google"
-      ]
+      "scopes": ["com.google"]
     }
   ]`}
 </CodeBlock>
@@ -92,7 +90,7 @@ TapPayment SDK 可以通过 NPMJS 进行安装, 开发者可以通过 **Edit > P
 
 **处理安卓依赖失败**
 
-EDM4U 会自动监控 TapPayment SDK 引入的 Android 依赖，但是在某些特殊情况下自动依赖解析可能失败，开发者可以通过 **Assets > External Dependency Manager > Android Resolver > Force Resolve** 来强制依赖解析。在测试之前请确认对于 `com.taptap.android.payment:unity` 的依赖被加到了 mainTemplate.gradle 文件中，如果 EDM4U 没有自动添加这个依赖，开发者也可以通过手动添加的方式处理依赖。
+EDM4U 会自动监控 TapTap IAP 引入的 Android 依赖，但是在某些特殊情况下自动依赖解析可能失败，开发者可以通过 **Assets > External Dependency Manager > Android Resolver > Force Resolve** 来强制依赖解析。在测试之前请确认对于 `com.taptap.android.payment:unity` 的依赖被加到了 mainTemplate.gradle 文件中，如果 EDM4U 没有自动添加这个依赖，开发者也可以通过手动添加的方式处理依赖。
 :::
 
 ## SDK 指南
@@ -150,11 +148,7 @@ public class MyIAPManager : IStoreListener {
         builder.Configure<ITapTapStoreConfiguration>().SetClientId("Your Client ID Here");
         builder.Configure<ITapTapStoreConfiguration>().SetClientToken("Your Client Token Here");
         builder.Configure<ITapTapStoreConfiguration>().SetRegionCode(1); // 0: CN, 1: GLOBAL
-        builder.AddProduct("100_gold_coins", ProductType.Consumable, new IDs
-        {
-            {"100_gold_coins_google", GooglePlay.Name},
-            {"100_gold_coins_mac", MacAppStore.Name}
-        });
+        builder.AddProduct("100_gold_coins", ProductType.Consumable);
 
         UnityPurchasing.Initialize (this, builder);
     }

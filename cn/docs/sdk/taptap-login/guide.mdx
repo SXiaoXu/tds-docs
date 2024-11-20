@@ -58,7 +58,7 @@ import CodeBlock from "@theme/CodeBlock";
 
 ## 准备集成 SDK
 
-1. 参考 [准备工作](/sdk/access/get-ready/) 创建应用、开启应用配置、绑定 API 域名；
+1. 参考 [准备工作](/sdk/access/get-ready/) 创建应用、开启应用配置；
 2. 参考 [快速开始](/sdk/access/get-ready/#配置签名证书) 配置包名与签名证书；
 
 ## SDK 获取
@@ -400,27 +400,24 @@ TapTapSDK.initWith(options)
 using TapSDK.Login;
 using System.Threading.Tasks;
 
-// 定义授权范围
-List<string> scopes = new List<string>();
-scopes.Add(TapTapLogin.TAP_LOGIN_SCOPE_PUBLIC_PROFILE);
-
-// 初始化登录请求 Task
-Task<TapTapAccount> task = TapTapLogin.Instance.LoginWithScopes(scopes.ToArray());
-var result = await task;
-
-// 判断登录结果
-if (task.IsCompleted)
+try
 {
-	// 登录成功
-} 
-else if (task.IsCanceled)
-{
- 	// 登录取消
+    // 定义授权范围
+    List<string> scopes = new List<string>
+    {
+        TapTapLogin.TAP_LOGIN_SCOPE_PUBLIC_PROFILE
+    };
+    // 发起 Tap 登录
+    var userInfo = await TapTapLogin.Instance.LoginWithScopes(scopes.ToArray());
+    Debug.Log($"登录成功，当前用户 ID：{userInfo.uniontId}");
 }
-else
+catch (TaskCanceledException)
 {
-	// 登录失败
-	Debug.Log($"登录失败: {task.Exception.Message}");
+    Debug.Log("用户取消登录");
+}
+catch (Exception exception)
+{
+    Debug.Log($"登录失败，出现异常：{exception}");
 }
 ```
 
@@ -745,7 +742,7 @@ Windows Registry Editor Version 5.00
 
 [HKEY_CLASSES_ROOT\open-taptap-{client_id}]
 @="{游戏名称}"
-"URL Protocol"="{程序.exe 安装路径}}"
+"URL Protocol"="{程序.exe 安装路径}"
 
 [HKEY_CLASSES_ROOT\open-taptap-{client_id}]
 @="{游戏名称}"
