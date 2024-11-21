@@ -1,9 +1,12 @@
 .mix_install_deps:
   interruptible: true
-  image: taptap-img-registry.cn-beijing.cr.aliyuncs.com/public/node-abd-common:4.0.0
+  image: registry.tapsvc.com/public/node18-buster:pnpm7.27.0-1.0.0
   tags:
     - node
   before_script:
+    - npm config set registry https://nexus.tapsvc.com/repository/npm-taptap
+    - yarn --version
+    - which yarn
     - export NODE_OPTIONS=--max_old_space_size=4096
     - yarn install --cache-folder .yarn-cache
   cache:
@@ -39,6 +42,8 @@
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
+    - git --version
+    - npm i -g zx
     - source ./scripts/slack-definition.sh
     - chmod -R 777 ./scripts && ./scripts/slack-notification
-  when: manual
+  
