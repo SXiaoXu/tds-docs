@@ -125,7 +125,6 @@ deploy_cn:
     VALUES_FILENAME: bj_values.yaml
   needs:
     - docker_upload_cn
-  when: manual
 # docker build hk
 docker_upload_hk:
   stage: upload
@@ -153,10 +152,8 @@ deploy_hk:
     VALUES_FILENAME: hk_values.yaml
   needs:
     - docker_upload_hk
-  when: manual
 # docker build cn rnd
 build_rnd_cn:
-  when: manual
   stage: build
   extends:
     - .mixin_build
@@ -198,10 +195,8 @@ deploy_rnd_cn:
     VALUES_FILENAME: rnd_values.yaml
   needs:
     - docker_upload_rnd_cn
-  when: manual
   # docker build hk rnd
 build_rnd_hk:
-  when: manual
   stage: build
   extends:
     - .mixin_build
@@ -243,4 +238,3 @@ deploy_rnd_hk:
     VALUES_FILENAME: rnd_intl_values.yaml
   needs:
     - docker_upload_rnd_hk
-  when: manual
