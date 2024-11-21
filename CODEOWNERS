@@ -1,0 +1,11 @@
+# https://git.gametaptap.com/help/user/project/code_owners.md
+
+CODEOWNERS @panyang
+
+* @huangshuzhi
+
+# CN
+/cn @ops/codeowner/tapsdk/release
+
+# HK
+/hk @ops/codeowner/tapsdk/release
