@@ -2,6 +2,8 @@
 source ./scripts/HASH.sh
 export DIST_HASH="$NOW_HASH"
 # 设置目标 url 链接
+git config --global user.name "sdk_notification_bot"
+git config --global user.email sdk_notification_bot@xd.com
 # 获取 commit 日志
 git fetch
 SOURCE_HASH=$(git rev-parse HEAD)
