@@ -179,7 +179,7 @@ docker_upload_rnd_cn:
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_NAMESPACE: web-frontend
-    DOCKER_REGISTRY_REPO: tapsdk-doc-cn
+    DOCKER_REGISTRY_REPO: tapsdk-doc-cn-rnd
     DOCKERFILE: cn.Dockerfile
     DOCKER_BUILD_PATH: .
   needs:
@@ -222,7 +222,7 @@ docker_upload_rnd_hk:
     - if: $CI_COMMIT_BRANCH == "master"
   variables:
     DOCKER_REGISTRY_NAMESPACE: web-frontend
-    DOCKER_REGISTRY_REPO: tapsdk-doc-intl
+    DOCKER_REGISTRY_REPO: tapsdk-doc-intl-rnd
     DOCKERFILE: hk.Dockerfile
     DOCKER_BUILD_PATH: .
   needs:
