@@ -116,6 +116,8 @@ docker_upload_cn:
     - build_cn
 deploy_cn:
   stage: deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
   extends:
     - .deploy-kubefiles-production
   environment:
@@ -145,6 +147,8 @@ deploy_hk:
   stage: deploy
   extends:
     - .deploy-kubefiles-production
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
   environment:
     name: hk/production
   variables:
