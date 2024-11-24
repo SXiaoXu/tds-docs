@@ -96,7 +96,7 @@ iOS 11 或更高版本，Xcode 版本 [14.1 或更高版本](https://developer.a
 
 ## SDK 获取
 
-单纯接入「TapTap 登录」，需要依赖 `TapLogin` 和 `TapCommon` 模块。请先 [下载](/tap-download) TapSDK，并添加相关依赖。
+单纯接入「TapTap 登录」，需要依赖 `TapLogin` 和 `TapCommon` 模块。请先 [下载](/v3/tap-download) TapSDK，并添加相关依赖。
 
 <MultiLang kind="ue">
 
@@ -106,19 +106,13 @@ SDK 可以**通过 Unity Package Manager 导入或手动导入**，二者任选�
 
 #### 方法一：使用 Unity Package Manager
 
-从 3.29.1 版本开始， SDK 修改 JSON 解析库为 `Newtonsoft-json`，如果当前工程已接入该依赖库，则不需额外处理，否则需在 `Packages/manifest.json` 添加如下依赖：
-
-```
-"com.unity.nuget.newtonsoft-json":"3.2.1"
-```
-
-
 在项目的 `Packages/manifest.json` 文件中添加以下依赖：
 
 <CodeBlock className="json">
   {`"dependencies":{
     "com.taptap.tds.login":"https://github.com/TapTap/TapLogin-Unity.git#${v3SDKVersions.taptap.unity}",
     "com.taptap.tds.common":"https://github.com/TapTap/TapCommon-Unity.git#${v3SDKVersions.taptap.unity}",
+    "com.leancloud.storage":"https://github.com/leancloud/csharp-sdk-upm.git#storage-${v3SDKVersions.leancloud.csharp}",
 }`}
 </CodeBlock>
 
@@ -126,23 +120,13 @@ SDK 可以**通过 Unity Package Manager 导入或手动导入**，二者任选�
 
 #### 方法二：手动导入
 
-1. 在 [下载页](/tap-download) 找到 **TapSDK Unity** 下载地址，下载 `TapSDK-UnityPackage.zip`。
+1. 在 [下载页](/v3/tap-download) 找到 **TapSDK Unity** 下载地址，下载 `TapSDK-UnityPackage.zip` 
 
 2. 在 Unity 项目中依次转到 **Assets > Import Packages > Custom Packages**，从解压后的 `TapSDK-UnityPackage.zip` 中，选择希望在游戏中使用的 TapSDK 包导入，其中：
 
    - `TapTap_Common.unitypackage` TapSDK 基础库，必选。
    - `TapTap_Login.unitypackage` TapTap 登录，必选。
-
-3. 如果当前项目已集成 Newtonsoft.Json 依赖，则忽略该步骤，否则在 NuGet.org [ Newtonsoft.Json ](https://www.nuget.org/packages/Newtonsoft.Json) 页面中通过点击右侧 Download package 下载库文件，并将下载的文件后缀从`.nupkg` 修改为 `.zip`，同时解压该文件并复制内部的 `Newtonsoft.Json.dll` 文件拷贝到工程 `Assets` 的 `Plugins` 目录下，另外为了避免导出 IL2CPP 平台时删除必要数据，需在 `Assets` 目录下创建 link.xml 文件（如果已有该文件，则添加如下内容），其内容如下：
-
-```
-<linker>
-  <assembly fullname="System.Core">
-    <type fullname="System.Linq.Expressions.Interpreter.LightLambda" preserve="all" />
-  </assembly>
-</linker>
-
-```
+3. 从 [LeanCloud-SDK 下载页](https://github.com/leancloud/csharp-sdk/releases) 中下载并解压 LeanCloud-SDK-Storage-Unity.zip，然后将 Plugins 文件夹拖拽至 Unity 即可。
 
 :::tip
 
@@ -187,7 +171,7 @@ SDK 可以**通过 Unity Package Manager 导入或手动导入**，二者任选�
 </>
 <>
 
-1. [下载 TapSDK Android](/tap-download)，解压后选择需要用到的 SDK 包导入到项目 `project/app/libs` 目录下。
+1. [下载 TapSDK Android](/v3/tap-download)，解压后选择需要用到的 SDK 包导入到项目 `project/app/libs` 目录下。
 
 2. 打开项目的 `project/app/build.gradle` 文件，添加 gradle 配置如下：
 
@@ -215,7 +199,7 @@ SDK 可以**通过 Unity Package Manager 导入或手动导入**，二者任选�
 
 1. 在 Xcode 选择工程，到 **Build Setting > Other Linker Flags** 添加 `-ObjC` 和 `-Wl -ld_classic`。
 
-2. 下载 [TapSDK iOS](/tap-download)，解压后选择需要导入的资源文件，直接拖拽到项目目录即可。
+2. 下载 [TapSDK iOS](/v3/tap-download)，解压后选择需要导入的资源文件，直接拖拽到项目目录即可。
 
 3. 视需要导入下载的资源文件：
 
@@ -360,7 +344,7 @@ SDK 可以**通过 Unity Package Manager 导入或手动导入**，二者任选�
 
 #### 安装插件
 
-* 下载 [TapSDK UE4](/tap-download)，TapSDK-UE4-xxx.zip 解压后将 `TapLogin`、`TapCommon` 文件夹 Copy 到项目的 `Plugins` 目录中
+* 下载 [TapSDK UE4](/v3/tap-download)，TapSDK-UE4-xxx.zip 解压后将 `TapLogin`、`TapCommon` 文件夹 Copy 到项目的 `Plugins` 目录中
 * 重启 Unreal Editor
 * 打开 编辑 > 插件 > 项目 > TapTap，开启 `TapLogin` 模块
 

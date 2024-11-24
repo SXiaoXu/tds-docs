@@ -58,7 +58,7 @@ import UnitySDKInstallation from "../_partials/unity-sdk-installation.mdx";
 
 ### SDK 获取
 
-可以在 [下载页](/tap-download) 获得 TapSDK，添加以下依赖：
+可以在 [下载页](/v3/tap-download) 获得 TapSDK，添加以下依赖：
 
 <MultiLang kind="ue">
 
@@ -72,6 +72,7 @@ npmDeps={[
 githubDeps={[
     {package: "com.taptap.tds.common", url: `https://github.com/TapTap/TapCommon-Unity.git#${v3SDKVersions.taptap.unity}`},
     {package: "com.taptap.tds.dlc", url: `https://github.com/TapTap/TapLicense-Unity.git#${v3SDKVersions.taptap.unity}`},
+    {package: "com.leancloud.storage", url: `https://github.com/leancloud/csharp-sdk-upm.git#storage-${v3SDKVersions.leancloud.csharp}`},
 ]}
 unitypackageModules={[
     {name: "TapTap_Common.unitypackage", desc: "TapSDK 基础库，必选"},
@@ -314,7 +315,7 @@ FTapLicense::SetTestEnvironment(bool bIsTest);
 
 ### DLC 查询和购买
 
-可以在 [下载页](/tap-download) 获得 TapSDK，添加以下依赖：
+可以在 [下载页](/v3/tap-download) 获得 TapSDK，添加以下依赖：
 
 <MultiLang kind="ue">
 
