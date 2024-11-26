@@ -5,7 +5,7 @@
 CODEOWNERS @panyang
 
 # CN
-/cn/ @ops/codeowner/tapsdk/release
+/cn/ @ops/codeowner/tapsdk/release @wanghao @yuwenjian
 
 # HK
-/hk/ @ops/codeowner/tapsdk/release
+/hk/ @ops/codeowner/tapsdk/release @wanghao @yuwenjian
