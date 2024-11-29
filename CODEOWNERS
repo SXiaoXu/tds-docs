@@ -1,11 +1,9 @@
 # https://git.gametaptap.com/help/user/project/code_owners.md
 
-* @huangshuzhi
-
-CODEOWNERS @panyang
+* @huangshuzhi @panyang
 
 # CN
-/cn/ @ops/codeowner/tapsdk/release @wanghao @yuwenjian
+/cn/ @zhaoyang1 @chenke @lichao @zhouxianli @wanghao @yuwenjian @suixiaoxu
 
 # HK
-/hk/ @ops/codeowner/tapsdk/release @wanghao @yuwenjian
+/hk/ @zhaoyang1 @chenke @lichao @zhouxianli @wanghao @yuwenjian @suixiaoxu
